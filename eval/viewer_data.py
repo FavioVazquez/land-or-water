@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from score import load_truth, load_run, score, RUNS, ROOT, FORMATS
 
 truth = load_truth()
-out = {"truth": "".join("1" if truth[k] else "0" for k in sorted(truth)), "runs": []}
+out = {"truth": "".join("1" if truth[k] else "0" for k in sorted(truth, key=lambda k: (-k[0], k[1]))), "runs": []}
 for r in RUNS:
     pts, meta = load_run(r)
     s = score(pts, truth)
