@@ -1,0 +1,79 @@
+{
+  "name": "olmo-3-7b-base.deg",
+  "model_file": "Olmo-3-1025-7B-Q8_0.gguf",
+  "model_desc": "olmo2 7B Q8_0",
+  "general.name": "allenai_Olmo 3 1025 7B",
+  "general.file_type": "7",
+  "n_params": 7298011136,
+  "n_vocab": 100278,
+  "chat_template": "{% for message in messages %}{{'<|im_start|>' + message['role'] + '\n' + message['content'] + '<|im_end|>' + '\n'}}{% endfor %}{% if add_generation_prompt %}{{ '<|im_start|>assistant\n' }}{% endif %}",
+  "prompt_example": "Land or Water? The coordinate below is in degrees with hemisphere letters (N or S for latitude, E or W for longitude). Answer with exactly one word: Land or Water.\nCoordinates: 41\u00b0N 73\u00b0W\nAnswer:",
+  "user_template": "Land or Water? The coordinate below is in degrees with hemisphere letters (N or S for latitude, E or W for longitude). Answer with exactly one word: Land or Water.\nCoordinates: {alat}\u00b0{ns} {alon}\u00b0{ew}",
+  "format": "deg",
+  "grid_step_deg": 10,
+  "mode": "completion (base model, no chat template)",
+  "completion_suffix": "\nAnswer:",
+  "answer_tokens": [
+    " Land",
+    " Water"
+  ],
+  "first_prompt_tokens": [
+    "Land",
+    " or",
+    " Water"
+  ],
+  "add_bos_token_meta": null,
+  "system_message": null,
+  "enable_thinking": null,
+  "template_file": null,
+  "template_sha256": null,
+  "embedded_template_renders_same_prompt": null,
+  "max_prompt_tokens": 49,
+  "min_prompt_tokens": 49,
+  "method": "each point evaluated alone: empty KV cache, full prompt, one llama_decode, logits of the last prompt token, log-softmax over the whole vocabulary",
+  "answer_token_ids": {
+    " Land": 11680,
+    " Water": 10164,
+    " land": 4363,
+    " water": 3090,
+    "Land": 43057,
+    "Water": 29353,
+    " LAND": 92956,
+    " WATER": 76347
+  },
+  "points": 648,
+  "lats": [
+    85,
+    -85,
+    10
+  ],
+  "lons": [
+    -175,
+    175,
+    10
+  ],
+  "tokens_evaluated": 31752,
+  "seconds_load": 0.77,
+  "seconds_run": 332.5,
+  "threads": 12,
+  "n_ctx": 256,
+  "n_batch": 256,
+  "n_ubatch": 256,
+  "seconds_per_point": 0.5131,
+  "loadavg_1min_during_run": {
+    "min": 12.15,
+    "mean": 12.35,
+    "max": 12.56,
+    "samples": 2
+  },
+  "repeat_check_points": 10,
+  "repeat_check_max_abs_logp_diff": 0.0,
+  "llama_cpp_python": "0.3.35",
+  "system_info": "CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | AVX512 = 1 | AVX512_VBMI = 1 | AVX512_VNNI = 1 | AVX512_BF16 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | ",
+  "cpu": "AMD EPYC 9R14",
+  "cpus": 32,
+  "mem_total": "MemTotal:       64419868 kB",
+  "os": "Linux-7.0.0-1013-aws-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "started_utc": "2026-10-03T10:42:02Z"
+}

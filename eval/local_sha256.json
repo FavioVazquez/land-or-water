@@ -1,0 +1,51 @@
+{
+  "_note": "sha256 of the GGUF files as used, compared with the Hugging Face LFS id in models.json (checked at download time by pdl.py).",
+  "Qwen3-0.6B-Q8_0.gguf": {
+    "sha256": "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031",
+    "checked": "2026-10-03 08:05 UTC, sha256sum"
+  },
+  "Qwen3-1.7B-Q8_0.gguf": {
+    "sha256": "061b54daade076b5d3362dac252678d17da8c68f07560be70818cace6590cb1a",
+    "checked": "2026-10-03 08:05 UTC, sha256sum"
+  },
+  "Qwen3-4B-Q8_0.gguf": {
+    "sha256": "8c2f07f26af9747e41988551106f149b03eb9b5cb6df636027b6bf6278473300",
+    "checked": "2026-10-03 08:05 UTC, sha256sum"
+  },
+  "Qwen3-8B-Q8_0.gguf": {
+    "sha256": "408b955510e196121c1c375201744783b5c9a43c7956d73fc78df54c66e883d6",
+    "checked": "2026-10-03 08:05 UTC, sha256sum"
+  },
+  "allenai_Olmo-3-7B-Instruct-Q8_0.gguf": {
+    "sha256": "1c46acf59464ab241d7d28209e7553c0793523ec665615c44b5ae072b1755940",
+    "checked": "2026-10-03 08:05 UTC, sha256sum"
+  },
+  "Olmo-3-1025-7B-Q8_0.gguf": {
+    "sha256": "9d2020f77a4774ced03868fb8e3670b39b49c684925f76791d33ea5918aa984f",
+    "checked": "2026-10-03 10:20 UTC, sha256sum"
+  },
+  "Qwen3-14B-Q8_0.gguf": {
+    "sha256": "a0dfe649137410b7d82f06a209240508e218f32f5b6fd81b69d6932160cfcd9d",
+    "checked": "2026-10-03 10:44 UTC, pdl.py"
+  },
+  "Qwen3-32B-Q8_0.gguf": {
+    "sha256": "2c50eb8aad05047dbf24fa014eb621adf552e14176cabe0c5db4ef38c91e2169",
+    "checked": "2026-10-03 10:59 UTC, pdl.py"
+  },
+  "allenai_Olmo-3.1-32B-Instruct-Q8_0.gguf": {
+    "sha256": "95aa3a90745c50a9ad8d76c09bcd434ed68061da9c0f8d52605ae04b7fcb2a16",
+    "checked": "2026-10-03 11:19 UTC, pdl.py"
+  },
+  "qwen2.5-7b-instruct-q8_0-00001-of-00003.gguf": {
+    "sha256": "26e30cb4559f0d9e9e11f34d351292af6f42199ce3fa742b5e7c5af4bc35b0f0",
+    "checked": "2026-10-03 14:12 UTC, pdl.py (shards 00002 and 00003 also matched)"
+  },
+  "gemma-4-26B-A4B-it-Q8_0.gguf": {
+    "sha256": "5f7cbd0f4564e84342fc34321a09acb54b1a3da9215124e5bf444baa6dda152c",
+    "checked": "2026-10-03 14:35 UTC, sha256sum of models/final/ (= unsloth/gemma-4-26B-A4B-it-GGUF)"
+  },
+  "gpt-oss-120b-MXFP4.gguf": {
+    "sha256": "582bd40f6886200101f4c4ed9f25f3fe80cc14c86e9e2b37746cd8904a0c622d",
+    "checked": "2026-10-03 14:40 UTC, sha256sum of models/final/ (watch_score.sh)"
+  }
+}

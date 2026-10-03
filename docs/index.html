@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Land or Water?</title>
+<meta name="description" content="Open models asked 16,200 times each on one CPU whether a coordinate is land or water. Compare their maps with the real Earth.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#090c12">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#090c12;--panel:#11161f;--panel2:#161c27;--text:#eef0f4;--dim:#a0a8b6;--rule:#303846;
+  --accent:#ffc45c;--teal:#78dcbe;--orange:#f0783c;--blue:#50aaff;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 24px 48px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:22px}
+h1{font-size:clamp(28px,4.4vw,44px);line-height:1.05;margin:0 0 8px;letter-spacing:-.02em;font-weight:700}
+h1 span{color:var(--accent)}
+.lede{margin:0;color:var(--dim);max-width:60ch}
+.links{display:flex;gap:16px;font-size:13px;font-family:var(--mono)}
+.links a{color:var(--dim);border-bottom:1px solid var(--rule);padding-bottom:1px}
+.links a:hover{color:var(--accent);text-decoration:none;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:12px}
+.picker{padding:14px 16px 6px;margin-bottom:20px}
+.group{margin-bottom:10px}
+.group h3{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:0 0 8px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{appearance:none;border:1px solid var(--rule);background:var(--panel2);color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer;text-align:left;font:inherit;font-size:13px;line-height:1.25;transition:border-color .12s,background .12s}
+.chip:hover{border-color:#4a5568}
+.chip small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:2px}
+.chip.olmo b{color:var(--teal)}
+.chip b{font-weight:600}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:#221d12;box-shadow:0 0 0 1px var(--accent) inset}
+.chip.excluded{opacity:.75}
+.mapbox{padding:14px}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--rule);border-radius:9px;padding:3px}
+.seg button{appearance:none;border:0;background:transparent;color:var(--dim);font:inherit;font-size:13px;font-weight:500;padding:6px 12px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel2);color:var(--text);box-shadow:0 0 0 1px var(--rule) inset}
+.seg button:hover{color:var(--text)}
+.now{font-size:13px;color:var(--dim);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.now b{color:var(--text);font-family:var(--sans);font-weight:600}
+.stage{position:relative;width:100%;aspect-ratio:2/1;border-radius:8px;overflow:hidden;background:#0c1624;touch-action:pan-y}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+.split{position:absolute;top:0;bottom:0;width:0;border-left:2px solid var(--text);display:none;pointer-events:none;box-shadow:0 0 12px rgba(0,0,0,.6)}
+.split .knob{position:absolute;top:50%;left:-15px;width:28px;height:28px;margin-top:-14px;border-radius:50%;background:var(--text);color:var(--bg);display:grid;place-items:center;font-size:12px;font-weight:700;pointer-events:auto;cursor:ew-resize;touch-action:none}
+.tag{position:absolute;top:8px;font-size:11px;font-family:var(--mono);background:rgba(9,12,18,.78);border:1px solid var(--rule);padding:2px 7px;border-radius:5px;display:none;pointer-events:none}
+.tag.l{left:8px}.tag.r{right:8px}
+.tip{position:absolute;pointer-events:none;background:rgba(17,22,31,.96);border:1px solid var(--rule);border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.45;min-width:170px;display:none;z-index:3;box-shadow:0 6px 24px rgba(0,0,0,.5);font-variant-numeric:tabular-nums}
+.tip .c{font-family:var(--mono);font-weight:500;margin-bottom:3px}
+.tip .row{display:flex;justify-content:space-between;gap:14px;color:var(--dim)}
+.tip .row b{color:var(--text);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:12px;font-size:12px;color:var(--dim)}
+.ramp{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px}
+.ramp i{display:block;width:160px;height:8px;border-radius:4px;background:linear-gradient(90deg,#0c1624,#566278,#ffc45c)}
+.sw{display:inline-flex;align-items:center;gap:6px}
+.sw i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.hint{margin-left:auto;font-size:11.5px}
+.score{padding:18px}
+.score h2{font-size:17px;margin:0 0 2px;font-weight:600}
+.score .asked{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:14px}
+.big{font-size:38px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.cmp{font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums;margin-top:2px}
+.delta{font-weight:600;font-family:var(--mono);font-size:12.5px;padding:1px 6px;border-radius:5px;margin-left:4px}
+.delta.neg{color:var(--orange);background:rgba(240,120,60,.12)}
+.delta.pos{color:var(--teal);background:rgba(120,220,190,.12)}
+.lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-weight:600;margin-bottom:4px}
+.blk{padding:14px 0;border-top:1px solid var(--rule)}
+.blk:first-of-type{border-top:0;padding-top:0}
+.aucrow{display:flex;align-items:baseline;gap:10px}
+.aucrow .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.bar{position:relative;height:8px;background:var(--bg);border:1px solid var(--rule);border-radius:5px;margin:10px 0 4px}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:4px}
+.bar .mark{position:absolute;top:-4px;bottom:-4px;width:1px;background:var(--dim)}
+.barlbl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.note{font-size:12.5px;color:var(--dim);margin:8px 0 0}
+dl{display:grid;grid-template-columns:1fr auto;gap:7px 12px;margin:0;font-size:13.5px}
+dt{color:var(--dim)}
+dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:13px}
+footer{margin-top:28px;padding:20px 22px}
+footer h2{font-size:14px;margin:0 0 10px;font-weight:600}
+footer ul{margin:0;padding-left:18px;color:var(--dim);font-size:13.5px}
+footer li{margin:4px 0}
+footer code{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--bg);padding:1px 5px;border-radius:4px;border:1px solid var(--rule)}
+.err{padding:40px;text-align:center;color:var(--dim)}
+@media (max-width:900px){
+  .grid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  .wrap{padding:20px 16px 36px}
+  .mapbox{padding:10px}
+  .seg button{padding:6px 9px;font-size:12.5px}
+  .ramp i{width:110px}
+  .hint{display:none}
+  .chip{font-size:12.5px;flex:0 0 auto}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-right:-16px;padding-right:16px}
+  .chips::-webkit-scrollbar{display:none}
+  .big{font-size:32px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Land or <span>Water?</span></h1>
+      <p class="lede">Open models, asked 16,200 times each on one CPU. Pick a model and compare its map with the real Earth.</p>
+    </div>
+    <nav class="links">
+      <a href="https://github.com/FavioVazquez/land-or-water">Repository</a>
+      <a href="https://github.com/FavioVazquez/showtime">Made with showtime</a>
+    </nav>
+  </header>
+
+  <section class="panel picker" id="picker" aria-label="Pick a model"></section>
+
+  <div class="grid">
+    <section class="panel mapbox">
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Map mode" id="modes">
+          <button data-mode="model" aria-pressed="true">Model</button>
+          <button data-mode="truth" aria-pressed="false">Answer key</button>
+          <button data-mode="compare" aria-pressed="false">Compare</button>
+          <button data-mode="errors" aria-pressed="false">Errors</button>
+        </div>
+        <div class="now" id="now"></div>
+      </div>
+      <div class="stage" id="stage">
+        <canvas id="map" aria-label="Map of P(Land)"></canvas>
+        <span class="tag l" id="tagL">Model</span>
+        <span class="tag r" id="tagR">Answer key</span>
+        <div class="split" id="split"><div class="knob" id="knob">&#x2194;</div></div>
+        <div class="tip" id="tip"></div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <aside class="panel score" id="score" aria-live="polite"></aside>
+  </div>
+
+  <footer class="panel">
+    <h2>How to read this</h2>
+    <ul>
+      <li><b>P(Land)</b> = P("Land") / (P("Land") + P("Water")) at the first answer token. Above 50% counts as a Land answer.</li>
+      <li>One prompt per point, empty cache, llama.cpp on CPU, 8-bit weights.</li>
+      <li><b>Area-weighted</b> accuracy weights each point by cos(latitude), like the Claude chart, so the crowded polar rows do not dominate. The always-Water floor is what you get by answering Water everywhere.</li>
+      <li>Answer key: Natural Earth 1:10m land. Scores are recomputed in the repo by <code>eval/score.py</code>.</li>
+      <li>Keyboard: <code>&larr;</code> <code>&rarr;</code> cycle models. Link to a run with <code>#run-id</code>.</li>
+    </ul>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+var DEFAULT_ID="gemma-4-26b-a4b.ref";
+var STAGES=[["full","Full grid (16,200 points)"],["pilot","Pilot (648 points)"],["excluded","Excluded (a bug, kept for the record)"]];
+var C_ORANGE=[240,120,60],C_BLUE=[80,170,255],C_GREY=[150,158,172],C_DARK=[22,32,48];
+var data,runs=[],truth,cur=null,mode="model",splitX=0.5;
+var $=function(id){return document.getElementById(id)};
+var canvas=$("map"),ctx=canvas.getContext("2d"),stage=$("stage"),tip=$("tip");
+var offModel=document.createElement("canvas"),offTruth=document.createElement("canvas"),offErr=document.createElement("canvas");
+
+// colour ramp #0c1624 -> #566278 -> #ffc45c
+var RAMP=(function(){
+  var a=[12,22,36],b=[86,98,120],c=[255,196,92],out=[];
+  for(var i=0;i<256;i++){var t=i/255,x,y,u;
+    if(t<.5){x=a;y=b;u=t/.5}else{x=b;y=c;u=(t-.5)/.5}
+    out.push([Math.round(x[0]+(y[0]-x[0])*u),Math.round(x[1]+(y[1]-x[1])*u),Math.round(x[2]+(y[2]-x[2])*u)]);}
+  return out;})();
+
+function dims(g){return g===2?{rows:90,cols:180,lat0:89,lon0:-179,step:2}:{rows:18,cols:36,lat0:85,lon0:-175,step:10}}
+function truthAt(lat,lon){var r=(89-lat)/2,c=(lon+179)/2;return truth[r*180+c]}
+function fmtLat(l){return Math.abs(l)+"° "+(l>=0?"N":"S")}
+function fmtLon(l){return Math.abs(l)+"° "+(l>=0?"E":"W")}
+function pct(x,d){return (x*100).toFixed(d==null?1:d)+"%"}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function isOlmo(r){return /olmo/i.test(r.label)}
+
+function decode(r){
+  if(r._p)return r._p;
+  var n=r.p.length/2,a=new Uint8Array(n);
+  for(var i=0;i<n;i++)a[i]=parseInt(r.p.substr(i*2,2),16);
+  return r._p=a;
+}
+
+function paint(off,w,h,fn){
+  off.width=w;off.height=h;
+  var c=off.getContext("2d"),img=c.createImageData(w,h),d=img.data;
+  for(var i=0;i<w*h;i++){var col=fn(i);d[i*4]=col[0];d[i*4+1]=col[1];d[i*4+2]=col[2];d[i*4+3]=255}
+  c.putImageData(img,0,0);
+}
+
+function buildTruth(){paint(offTruth,180,90,function(i){return truth[i]?RAMP[255]:RAMP[0]})}
+
+function buildRun(r){
+  var D=dims(r.grid),p=decode(r);
+  paint(offModel,D.cols,D.rows,function(i){return RAMP[p[i]]});
+  paint(offErr,D.cols,D.rows,function(i){
+    var row=Math.floor(i/D.cols),col=i%D.cols,lat=D.lat0-row*D.step,lon=D.lon0+col*D.step;
+    var t=truthAt(lat,lon),land=p[i]>127;
+    if(land&&t)return C_GREY; if(!land&&!t)return C_DARK;
+    return land?C_ORANGE:C_BLUE;
+  });
+}
+
+function size(){
+  var dpr=Math.min(window.devicePixelRatio||1,3),w=stage.clientWidth,h=stage.clientHeight;
+  var W=Math.max(1,Math.round(w*dpr)),H=Math.max(1,Math.round(h*dpr));
+  if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H}
+  draw();
+}
+
+function blit(src,sx0,sx1){
+  // draw horizontal slice [sx0,sx1] (0..1) of src onto canvas
+  var W=canvas.width,H=canvas.height;
+  ctx.save();ctx.beginPath();ctx.rect(Math.round(sx0*W),0,Math.round((sx1-sx0)*W)+1,H);ctx.clip();
+  ctx.imageSmoothingEnabled=false;ctx.drawImage(src,0,0,W,H);ctx.restore();
+}
+
+function graticule(){
+  var W=canvas.width,H=canvas.height,dpr=W/stage.clientWidth;
+  ctx.save();ctx.strokeStyle="rgba(238,240,244,.10)";ctx.lineWidth=1*dpr;ctx.setLineDash([3*dpr,4*dpr]);
+  ctx.beginPath();
+  [0].forEach(function(lat){var y=(90-lat)/180*H;ctx.moveTo(0,y);ctx.lineTo(W,y)});
+  [0].forEach(function(lon){var x=(lon+180)/360*W;ctx.moveTo(x,0);ctx.lineTo(x,H)});
+  ctx.stroke();ctx.restore();
+}
+
+function draw(){
+  if(!cur)return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(mode==="model")blit(offModel,0,1);
+  else if(mode==="truth")blit(offTruth,0,1);
+  else if(mode==="errors")blit(offErr,0,1);
+  else{blit(offModel,0,splitX);blit(offTruth,splitX,1)}
+  graticule();
+  var cmp=mode==="compare";
+  $("split").style.display=cmp?"block":"none";
+  $("split").style.left=(splitX*100)+"%";
+  $("tagL").style.display=$("tagR").style.display=cmp?"block":"none";
+}
+
+function legend(){
+  var L=$("legend");
+  if(mode==="errors"){
+    L.innerHTML='<span class="sw"><i style="background:rgb(150,158,172)"></i>Land, right</span>'+
+      '<span class="sw"><i style="background:rgb(22,32,48);outline:1px solid #303846"></i>Water, right</span>'+
+      '<span class="sw"><i style="background:#f0783c"></i>Said Land on water</span>'+
+      '<span class="sw"><i style="background:#50aaff"></i>Said Water on land</span>'+
+      (cur.grid===10?'<span class="hint">Pilot points checked against the answer key at the same coordinate</span>':'');
+  }else{
+    L.innerHTML='<span class="ramp">Water <i></i> Land</span><span style="font-family:var(--mono);font-size:11px">P(Land) 0% → 100%</span>'+
+      '<span class="hint">'+(mode==="compare"?"Drag the handle to compare":"Hover or tap a cell")+'</span>';
+  }
+}
+
+function renderPicker(){
+  var html="";
+  STAGES.forEach(function(s){
+    var list=runs.filter(function(r){return r.stage===s[0]});
+    if(!list.length)return;
+    html+='<div class="group"><h3>'+esc(s[1])+'</h3><div class="chips">';
+    list.forEach(function(r){
+      html+='<button class="chip'+(isOlmo(r)?" olmo":"")+(r.stage==="excluded"?" excluded":"")+'" data-id="'+esc(r.id)+'" aria-pressed="false"><b>'+esc(r.label)+'</b><small>'+esc(r.asked)+'</small></button>';
+    });
+    html+='</div></div>';
+  });
+  $("picker").innerHTML=html;
+  $("picker").addEventListener("click",function(e){var b=e.target.closest(".chip");if(b)select(b.getAttribute("data-id"),true)});
+}
+
+function renderScore(r){
+  var d=r.area_weighted-r.floor_area_weighted,dp=(d*100).toFixed(1);
+  var cls=d<0?"neg":"pos",sign=d>0?"+":"";
+  var aucW=Math.max(0,Math.min(1,r.auc))*100;
+  $("score").innerHTML=
+    '<h2'+(isOlmo(r)?' style="color:var(--teal)"':'')+'>'+esc(r.label)+'</h2>'+
+    '<div class="asked">asked: “'+esc(r.asked)+'”</div>'+
+    '<div class="blk"><div class="lbl">Area-weighted accuracy</div>'+
+      '<div class="big">'+pct(r.area_weighted)+'</div>'+
+      '<div class="cmp">vs '+pct(r.floor_area_weighted)+' always-Water <span class="delta '+cls+'">'+sign+dp+'</span></div></div>'+
+    '<div class="blk"><div class="lbl">AUC</div>'+
+      '<div class="aucrow"><span class="v">'+r.auc.toFixed(2)+'</span><span class="cmp">'+(r.auc>=.75?"clearly above a coin":r.auc>=.6?"somewhat above a coin":"close to a coin")+'</span></div>'+
+      '<div class="bar"><div class="fill" style="width:'+aucW+'%"></div><div class="mark" style="left:50%"></div></div>'+
+      '<div class="barlbl"><span>0</span><span>0.5 coin</span><span>1.0 perfect</span></div>'+
+      '<p class="note">Pick a random land point and a random water point: how often does the model give the land point the higher P(Land)? 0.50 is a coin.</p></div>'+
+    '<div class="blk"><dl>'+
+      '<dt>Accuracy</dt><dd>'+pct(r.accuracy)+' <span style="color:var(--dim)">/ '+pct(r.floor_accuracy)+'</span></dd>'+
+      '<dt>Says Land</dt><dd>'+r.says_land.toLocaleString("en-US")+'</dd>'+
+      '<dt>Really land</dt><dd>'+r.is_land.toLocaleString("en-US")+'</dd>'+
+      '<dt>Points</dt><dd>'+r.points.toLocaleString("en-US")+' <span style="color:var(--dim)">('+r.grid+'° grid)</span></dd>'+
+      '<dt>Run time</dt><dd>'+r.minutes.toFixed(1)+' min</dd>'+
+      '<dt>Format</dt><dd>'+esc(r.format)+'</dd>'+
+    '</dl></div>';
+}
+
+function select(id,push){
+  var r=runs.find(function(x){return x.id===id})||runs.find(function(x){return x.id===DEFAULT_ID})||runs[0];
+  cur=r;buildRun(r);
+  document.querySelectorAll(".chip").forEach(function(b){b.setAttribute("aria-pressed",b.getAttribute("data-id")===r.id?"true":"false")});
+  $("now").innerHTML='<b>'+esc(r.label)+'</b> · '+esc(r.stage==="full"?"2° grid":r.stage==="pilot"?"10° pilot":"excluded")+' · '+pct(r.area_weighted)+' area-weighted';
+  $("tagL").textContent=r.label;
+  renderScore(r);legend();draw();hideTip();
+  if(push&&location.hash.slice(1)!==r.id)history.replaceState(null,"","#"+r.id);
+}
+
+function setMode(m){
+  mode=m;
+  document.querySelectorAll("#modes button").forEach(function(b){b.setAttribute("aria-pressed",b.getAttribute("data-mode")===m?"true":"false")});
+  legend();draw();hideTip();
+}
+
+// tooltip
+function hideTip(){tip.style.display="none"}
+function showTip(clientX,clientY){
+  if(!cur)return;
+  var rect=stage.getBoundingClientRect(),fx=(clientX-rect.left)/rect.width,fy=(clientY-rect.top)/rect.height;
+  if(fx<0||fx>=1||fy<0||fy>=1){hideTip();return}
+  var useTruthGrid=mode==="truth"||(mode==="compare"&&fx>=splitX);
+  var D=useTruthGrid?dims(2):dims(cur.grid);
+  var row=Math.min(D.rows-1,Math.floor(fy*D.rows)),col=Math.min(D.cols-1,Math.floor(fx*D.cols));
+  var lat=D.lat0-row*D.step,lon=D.lon0+col*D.step,t=truthAt(lat,lon);
+  var html='<div class="c">'+fmtLat(lat)+', '+fmtLon(lon)+'</div>';
+  if(useTruthGrid&&cur.grid!==2){
+    html+='<div class="row">Answer key <b>'+(t?"Land":"Water")+'</b></div><div class="row" style="font-size:11px">Pilot asked only every 10°</div>';
+  }else{
+    var p=decode(cur)[row*D.cols+col],land=p>127,ok=land===!!t;
+    html+='<div class="row">P(Land) <b>'+(p/255*100).toFixed(1)+'%</b></div>'+
+      '<div class="row">Model says <b>'+(land?"Land":"Water")+'</b></div>'+
+      '<div class="row">Answer key <b>'+(t?"Land":"Water")+'</b></div>'+
+      '<div class="row">Verdict <b style="color:'+(ok?"var(--teal)":(land?"var(--orange)":"var(--blue)"))+'">'+(ok?"right":"wrong")+'</b></div>';
+  }
+  tip.innerHTML=html;tip.style.display="block";
+  var x=clientX-rect.left+14,y=clientY-rect.top+14,tw=tip.offsetWidth,th=tip.offsetHeight;
+  if(x+tw>rect.width-4)x=clientX-rect.left-tw-14;
+  if(y+th>rect.height-4)y=clientY-rect.top-th-14;
+  tip.style.left=Math.max(4,x)+"px";tip.style.top=Math.max(4,y)+"px";
+}
+
+// compare slider dragging
+var dragging=false;
+function setSplit(clientX){var rect=stage.getBoundingClientRect();splitX=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));draw()}
+stage.addEventListener("pointerdown",function(e){
+  if(mode==="compare"){dragging=true;try{stage.setPointerCapture(e.pointerId)}catch(_){}setSplit(e.clientX);hideTip();e.preventDefault();return}
+  showTip(e.clientX,e.clientY);
+});
+stage.addEventListener("pointermove",function(e){
+  if(dragging){setSplit(e.clientX);return}
+  if(e.pointerType==="mouse")showTip(e.clientX,e.clientY);
+});
+function endDrag(e){if(dragging){dragging=false;try{stage.releasePointerCapture(e.pointerId)}catch(_){}if(e.pointerType==="mouse")showTip(e.clientX,e.clientY)}}
+stage.addEventListener("pointerup",endDrag);
+stage.addEventListener("pointercancel",endDrag);
+stage.addEventListener("pointerleave",function(e){if(!dragging&&e.pointerType==="mouse")hideTip()});
+$("knob").style.touchAction="none";
+$("split").addEventListener("pointerdown",function(e){e.stopPropagation();dragging=true;try{stage.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+
+$("modes").addEventListener("click",function(e){var b=e.target.closest("button");if(b)setMode(b.getAttribute("data-mode"))});
+
+document.addEventListener("keydown",function(e){
+  if(!cur||e.altKey||e.ctrlKey||e.metaKey)return;
+  if(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+  if(e.key==="ArrowLeft"||e.key==="ArrowRight"){
+    var i=runs.indexOf(cur),n=runs.length;
+    i=(i+(e.key==="ArrowRight"?1:-1)+n)%n;select(runs[i].id,true);
+    var b=document.querySelector('.chip[aria-pressed="true"]');if(b&&b.scrollIntoView)b.scrollIntoView({block:"nearest",inline:"nearest"});
+    e.preventDefault();
+  }
+});
+window.addEventListener("hashchange",function(){var id=decodeURIComponent(location.hash.slice(1));if(!cur||id!==cur.id)select(id,false)});
+if(window.ResizeObserver)new ResizeObserver(size).observe(stage);else window.addEventListener("resize",size);
+
+function hashId(){var h=decodeURIComponent(location.hash.slice(1));return /^[A-Za-z0-9.\-_]+$/.test(h)?h:DEFAULT_ID}
+
+fetch("data.json").then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(d){
+  data=d;truth=new Uint8Array(d.truth.length);
+  for(var i=0;i<d.truth.length;i++)truth[i]=d.truth.charCodeAt(i)===49?1:0;
+  var order={full:0,pilot:1,excluded:2};
+  runs=d.runs.slice().sort(function(a,b){return order[a.stage]-order[b.stage]});
+  buildTruth();renderPicker();select(hashId(),false);size();
+}).catch(function(err){
+  stage.innerHTML='<div class="err">Could not load data.json ('+esc(err.message)+').</div>';
+});
+})();
+</script>
+</body>
+</html>
