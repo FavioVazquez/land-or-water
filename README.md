@@ -1,6 +1,6 @@
 # Land or Water?
 
-[![numbers check](https://github.com/FavioVazquez/land-or-water/actions/workflows/check.yml/badge.svg)](https://github.com/FavioVazquez/land-or-water/actions/workflows/check.yml) [![made with showtime](https://img.shields.io/badge/video-made%20with%20showtime-ffc45c)](https://github.com/FavioVazquez/showtime)
+[![numbers check](https://github.com/FavioVazquez/land-or-water/actions/workflows/check.yml/badge.svg)](https://github.com/FavioVazquez/land-or-water/actions/workflows/check.yml) [![made with showtime](https://img.shields.io/badge/video-made%20with%20showtime-ffc45c)](https://github.com/FavioVazquez/showtime) [![built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-d97757)](https://claude.com/claude-code)
 
 **Karpathy's "Land or Water?" test, on open models you can run yourself.** One CPU box, no GPU, no API keys.
 
@@ -93,15 +93,19 @@ GitHub runs that check on every push, so a green badge means the write-up matche
 - The final prompt was chosen after the first one failed. Every format we tried is here.
 - Our Qwen2.5 7B run never matched the reference write-up's picture of that model. We don't know why; it stays open.
 
-## The video was made with showtime
+## How this was made
 
-The video reply was made by **Claude Opus 5.5** (running in Devin) with **[showtime](https://github.com/FavioVazquez/showtime)**, an open-source video studio for coding agents. Opus built every scene, drew the maps from the raw CSVs and rendered the video on the same CPU box, with no API keys. For a video about data, three things mattered:
+Agents did the work here; a person picked the question and checked the result.
 
-- **A claims ledger.** Every number on screen names the result file and field it came from, and is recomputed from the CSVs before every render.
-- **No stand-in data in a final.** Previews carried a banner on every frame; the final render refuses to run on placeholder data.
-- **A critic that didn't make the video.** A separate review pass found 19 issues before posting; 17 were fixed.
+- **[Claude Code](https://claude.com/claude-code)** with **Claude Opus 5.5** ([Anthropic](https://www.anthropic.com)) led the project: it designed the experiment, launched the runs on the CPU box, checked every number against the raw data, wrote the article and built this repo, the viewer and the check that runs on every push.
+- **[Devin](https://devin.ai)** ([Cognition](https://cognition.ai)) sessions running Claude Opus 5.5 worked in parallel: on the eval pipeline, the long write-up, and the video.
+- **[showtime](https://github.com/FavioVazquez/showtime)**, an open-source video studio for coding agents, made the video. Opus built every scene, drew the maps from the raw CSVs and rendered it on the same CPU box, with no API keys. For a video about data, three things mattered:
+  - **A claims ledger.** Every number on screen names the result file and field it came from, and is recomputed from the CSVs before every render.
+  - **No stand-in data in a final.** Previews carried a banner on every frame; the final render refuses to run on placeholder data.
+  - **A critic that didn't make the video.** A separate review pass found 19 issues before posting; 17 were fixed.
+- **[llama.cpp](https://github.com/ggml-org/llama.cpp)** ran the open models; **[Natural Earth](https://www.naturalearthdata.com/)** is the answer key.
 
-Want your agent to turn its own experiments into videos like this? `npx skills add FavioVazquez/showtime`, or see the [showtime repo](https://github.com/FavioVazquez/showtime).
+Want your agent to turn its own experiments into videos like this? `npx skills add FavioVazquez/showtime`, or `/plugin marketplace add FavioVazquez/showtime` in Claude Code.
 
 ## Credits
 
