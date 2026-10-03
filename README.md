@@ -6,7 +6,7 @@
 
 Ask a model *"Land or Water?"* for 16,200 coordinates on a 2-degree grid, plot the answers, and you get the world as the model imagines it. The newest Claude models draw it [almost perfectly](https://x.com/karpathy/status/2105909609487872075). This repo asks the same question to 11 open models, keeps every raw answer, and checks every number against the data.
 
-**[Open the map viewer](https://faviovazquez.github.io/land-or-water/)** · [Watch the video](REPLY_URL) · [Results table](RESULTS.md)
+**[Open the map viewer](https://faviovazquez.github.io/land-or-water/)** · [Watch the video](https://x.com/FavioVaz/status/2106420676731056192) · [Results table](RESULTS.md)
 
 ![Gemma 4 26B-A4B's map of the Earth next to the real one](figures/final_vs_truth.png)
 
@@ -95,7 +95,7 @@ GitHub runs that check on every push, so a green badge means the write-up matche
 
 ## The video was made with showtime
 
-The video reply was made by a coding agent with **[showtime](https://github.com/FavioVazquez/showtime)**, an open-source video studio for coding agents. It renders on your own machine, with no API keys. For a video about data, three things mattered:
+The video reply was made by **Claude Opus 5.5** (running in Devin) with **[showtime](https://github.com/FavioVazquez/showtime)**, an open-source video studio for coding agents. Opus built every scene, drew the maps from the raw CSVs and rendered the video on the same CPU box, with no API keys. For a video about data, three things mattered:
 
 - **A claims ledger.** Every number on screen names the result file and field it came from, and is recomputed from the CSVs before every render.
 - **No stand-in data in a final.** Previews carried a banner on every frame; the final render refuses to run on placeholder data.
