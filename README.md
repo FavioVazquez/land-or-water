@@ -50,7 +50,7 @@ score against Natural Earth 1:10m land:
 
 - Every point is its own prompt with an empty cache: no batching, no prefix reuse. Random points are re-run at the end of every run (40 on the full grid, 10 on the pilot) and matched exactly.
 - Each model file is pinned to a Hugging Face commit and checked by sha256 ([`eval/models.json`](eval/models.json)).
-- Chat templates are the official ones from each model's repo ([`eval/templates/`](eval/templates/)).
+- Chat templates are the official ones from each model's repo ([`eval/templates/`](eval/templates/)). Each run records the template's sha256, the token ids it read and the llama.cpp version; the [provenance table](RESULTS.md#what-pins-each-run) lists them per run, and the check re-hashes every template.
 - The always-"Water" floor is printed next to every score. On this grid it is 66.8% plain and 71.1% area-weighted, so a model must beat that to know anything.
 
 ## Run it yourself
